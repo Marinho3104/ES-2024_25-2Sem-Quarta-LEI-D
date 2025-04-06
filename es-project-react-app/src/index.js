@@ -1,13 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './pages/App';
+import App from './pages/app/App';
+import LandingPage from './pages/landingPage/LandingPage';
+import LoadingCSV from './pages/loadCSV/LoadCSV';
 import reportWebVitals from './tests/reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
+    {/* <LandingPage /> */}
+    {/* <LoadingCSV /> */}
   </React.StrictMode>
 );
 
