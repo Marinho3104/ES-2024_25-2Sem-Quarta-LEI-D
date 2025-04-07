@@ -1,5 +1,6 @@
 
 .themed-button {
+  border: none;
   display: block;
   font-size: 25px;
   font-weight: bold;

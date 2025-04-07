@@ -10,7 +10,7 @@ function LoadingCSV( {textContent} ) {
       <section class="text-content-limit">
         <p class="text-content"> {textContent} </p>
       </section>
-      <ThemedButton buttonTextContent="Carregar" /> 
+      <ThemedButton buttonTextContent="Carregar" buttonOnClick={ () => window.location.href = '/homepage' } /> 
 
     </section>
   );

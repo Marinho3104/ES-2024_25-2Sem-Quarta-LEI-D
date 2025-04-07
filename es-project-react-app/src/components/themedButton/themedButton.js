@@ -1,10 +1,10 @@
 
 import './themedButton.css';
 
-function ThemedButton( {buttonTextContent} ) {
+function ThemedButton( { buttonTextContent, buttonOnClick } ) {
 
   return (
-    <button class="themed-button">
+    <button class="themed-button" onClick={() => buttonOnClick()}>
      {buttonTextContent} 
     </button>
   );
