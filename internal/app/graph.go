@@ -6,16 +6,23 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
-
-	// "github.com/dominikbraun/graph/draw"
 	"github.com/twpayne/go-geom"
 	"github.com/twpayne/go-geom/encoding/geojson"
 	"github.com/twpayne/go-geom/encoding/wkt"
 )
+
+var propertyHash map[string][]Property = make(map[string][]Property)
+
+var propertyHashCode = func(p Property) int {
+	return p.id
+}
+
+var g = graph.New(propertyHashCode)
 
 func readFile() ([][]string, error) {
 
@@ -50,7 +57,7 @@ func readFile() ([][]string, error) {
 
 func createPropertyList() []Property {
 
-	var propertyList []Property
+	var propertyList []Property = make([]Property, 0)
 
 	data, err := readFile()
 	if err != nil {
@@ -61,7 +68,6 @@ func createPropertyList() []Property {
 
 	for i, line := range data {
 		// Ignoring first line (header)
-
 		if i > 0 {
 			var record Property
 
@@ -78,7 +84,7 @@ func createPropertyList() []Property {
 				case 5:
 					convertedField, err := wkt.Unmarshal(field)
 
-					if err != nil {
+					if err != nil || strings.Contains(field, "EMPTY") {
 						break
 					}
 
@@ -98,6 +104,8 @@ func createPropertyList() []Property {
 				}
 			}
 
+			getCoods(line[5], record)
+
 			// Do not add wrong data
 			if record.shapeArea == 0 || record.geometry.Bounds().IsEmpty() {
 				continue
@@ -107,59 +115,64 @@ func createPropertyList() []Property {
 		}
 	}
 
+	// for _, property := range propertyHash["299218.5203999998 3623637.4791"] {
+	// 	fmt.Println(property.id)
+	// }
+
 	return propertyList
 }
 
-func CreateGraph() {
-	propertyHash := func(p Property) int {
-		return p.id
-	}
+func getCoods(mp string, property Property) {
+	result := strings.Replace(mp, "MULTIPOLYGON (((", "", 1)
+	result = strings.Replace(result, ")))", "", 1)
 
-	g := graph.New(propertyHash)
+	results := strings.SplitSeq(result, ", ")
+
+	for result := range results {
+		if propertyHash[result] == nil {
+			propertyHash[result] = []Property{property}
+
+		} else if !contains(propertyHash[result], property) {
+			propertyHash[result] = append(propertyHash[result], property)
+		}
+	}
+}
+
+func CreateGraph() {
+
 	propertyList := createPropertyList()
 
-	fmt.Println("Creating the graph")
+	fmt.Println("Creating the graph...")
 
 	for _, property := range propertyList {
 		g.AddVertex(property)
 	}
 
-	fmt.Println("Creating edges")
+	createAdges()
 
-	propertyListLen := len(propertyList)
-
-	start := time.Now()
-	for i := 0; i < propertyListLen; i++ {
-		currentProperty := propertyList[i]
-
-		for j := i + 1; j < propertyListLen; j++ {
-			cmpProperty := propertyList[j]
-			// Check if bounding boxes intersect
-			if bboxOverlap(currentProperty.geometry.Bounds(), cmpProperty.geometry.Bounds()) {
-
-				// fmt.Printf("%d --- %d\n", propertyList[i].id, propertyList[j].id)
-				err := g.AddEdge(currentProperty.id, cmpProperty.id)
-				if err != nil {
-					fmt.Println(err)
-				}
-
-			}
-
-		}
-	}
-	end := time.Now()
-
-	size, _ := g.Size()
-
-	fmt.Println("Fineshed with ", size, " edges")
-	fmt.Println("In: ", end.Sub(start).Minutes())
+	// size, _ := g.Size()
+	// fmt.Println("Fineshed with ", size, " edges")
+	// fmt.Println("In ", end.Sub(start).Seconds())
 
 	file, _ := os.Create("../../assets/graph.gv")
 	draw.DOT(g, file)
-
 }
 
-func bboxOverlap(a, b *geom.Bounds) bool {
-	return !(a.Max(0) < b.Min(0) || a.Min(0) > b.Max(0) ||
-		a.Max(1) < b.Min(1) || a.Min(1) > b.Max(1))
+func createAdges() {
+	for _, propertyHashList := range propertyHash {
+		for i := range propertyHashList {
+			for j := i + 1; j < len(propertyHashList); j++ {
+				g.AddEdge(propertyHashList[i].id, propertyHashList[j].id)
+			}
+		}
+	}
+}
+
+func contains(s []Property, e Property) bool {
+	for _, a := range s {
+		if a.id == e.id {
+			return true
+		}
+	}
+	return false
 }
