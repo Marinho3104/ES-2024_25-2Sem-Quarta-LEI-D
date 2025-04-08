@@ -7,7 +7,7 @@ import (
 
 func main() {
 
-  // app.Start()
-	app.ReadFile();
+	app.CreateGraph()
+  app.Start()
 
 }

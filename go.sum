@@ -1,0 +1,6 @@
+github.com/dominikbraun/graph v0.23.0 h1:TdZB4pPqCLFxYhdyMFb1TBdFxp8XLcJfTTBQucVPgCo=
+github.com/dominikbraun/graph v0.23.0/go.mod h1:yOjYyogZLY1LSG9E33JWZJiq5k83Qy2C6POAuiViluc=
+github.com/go-spatial/proj v0.3.0 h1:2IRb4elpnmVy1tUKRGBR68uiyZU4Pmny8yZC7TEUdSg=
+github.com/go-spatial/proj v0.3.0/go.mod h1:wF0V0A60cTD5uzXeg+P52E1GtMY40PIiyYNJVvHXm6k=
+github.com/twpayne/go-geom v1.6.0 h1:WPOJLCdd8OdcnHvKQepLKwOZrn5BzVlNxtQB59IDHRE=
+github.com/twpayne/go-geom v1.6.0/go.mod h1:Kr+Nly6BswFsKM5sd31YaoWS5PeDDH2NftJTK7Gd028=
