@@ -4,7 +4,6 @@ import "net/http"
 
 func Set_Handlers() {
 
-  fs := http.FileServer(http.Dir("web"))
-  http.Handle("/", http.StripPrefix("/", fs))
-
+	http.HandleFunc("/", handler_main)
+	http.HandleFunc("/api/upload", upload_handler)
 }

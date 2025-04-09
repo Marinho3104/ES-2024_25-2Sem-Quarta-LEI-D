@@ -1,10 +1,13 @@
 package main
 
-import "ES-2024_25-2Sem-Quarta-LEI-D/internal/app"
+import (
+	"ES-2024_25-2Sem-Quarta-LEI-D/internal/app"
+)
 
 
 func main() {
 
+	app.CreateGraph()
   app.Start()
 
 }
