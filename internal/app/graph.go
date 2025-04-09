@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
