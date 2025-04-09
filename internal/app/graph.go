@@ -17,6 +17,8 @@ import (
 	"github.com/twpayne/go-geom/encoding/wkt"
 )
 
+var globalGraph graph.Graph[int, Property]
+
 func readFile() ([][]string, error) {
 
 	fmt.Println("Loading file...")
@@ -28,7 +30,7 @@ func readFile() ([][]string, error) {
 	}
 	defer file.Close()
 
-	fmt.Println("File loaded successfuly!! \n")
+	fmt.Println("File loaded successfuly!!")
 
 	reader := csv.NewReader(file)
 	reader.Comma = ';'
@@ -111,17 +113,23 @@ func createPropertyList() []Property {
 }
 
 func CreateGraph() {
+
+	if globalGraph != nil {
+		fmt.Println("Graph already created, returning the existing graph.")
+		return
+	}
+
 	propertyHash := func(p Property) int {
 		return p.id
 	}
 
-	g := graph.New(propertyHash)
+	globalGraph = graph.New(propertyHash)
 	propertyList := createPropertyList()
 
 	fmt.Println("Creating the graph")
 
 	for _, property := range propertyList {
-		g.AddVertex(property)
+		globalGraph.AddVertex(property)
 	}
 
 	fmt.Println("Creating edges")
@@ -138,7 +146,7 @@ func CreateGraph() {
 			if bboxOverlap(currentProperty.geometry.Bounds(), cmpProperty.geometry.Bounds()) {
 
 				// fmt.Printf("%d --- %d\n", propertyList[i].id, propertyList[j].id)
-				err := g.AddEdge(currentProperty.id, cmpProperty.id)
+				err := globalGraph.AddEdge(currentProperty.id, cmpProperty.id)
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -149,17 +157,29 @@ func CreateGraph() {
 	}
 	end := time.Now()
 
-	size, _ := g.Size()
+	size, _ := globalGraph.Size()
 
 	fmt.Println("Fineshed with ", size, " edges")
 	fmt.Println("In: ", end.Sub(start).Minutes())
 
 	file, _ := os.Create("../../assets/graph.gv")
-	draw.DOT(g, file)
+	draw.DOT(globalGraph, file)
 
 }
 
 func bboxOverlap(a, b *geom.Bounds) bool {
 	return !(a.Max(0) < b.Min(0) || a.Min(0) > b.Max(0) ||
 		a.Max(1) < b.Min(1) || a.Min(1) > b.Max(1))
+}
+
+func GetGraph() graph.Graph[int, Property] {
+	if globalGraph == nil {
+		fmt.Println("Graph has not been created yet, creating now.")
+		CreateGraph()
+	}
+	return globalGraph
+}
+
+func SetGraph(a graph.Graph[int, Property]) {
+	globalGraph = a
 }

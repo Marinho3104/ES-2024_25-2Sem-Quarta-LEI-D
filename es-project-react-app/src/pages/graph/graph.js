@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import CytoscapeGraph from './CytoscapeGraph';
+import SigmaGraph from './SigmaGraph';
 import './graph.css';
 
 function Graph() {
@@ -14,7 +14,7 @@ function Graph() {
   return (
     <section className="graph-main-content">
       <section className="graph-content">
-        <CytoscapeGraph />
+        <SigmaGraph />
       </section>
 
       <section className="graph-header-content">
@@ -23,7 +23,8 @@ function Graph() {
             key={index}
             className={headerTabsState[index] ? "graph-header-tab-selected" : "graph-header-tab"}
             onClick={graphHeadeTabOnClick}
-          >
+          > 
+
             {tab}
           </section>
         ))}

@@ -37,5 +37,5 @@ func upload_handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "File %s uploaded successfully", header.Filename)
+	fmt.Println(w, "File %s uploaded successfully", header.Filename)
 }

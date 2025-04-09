@@ -8,5 +8,9 @@ type Property struct {
 	shapeArea float32
 	freguesia string
 	municipio string
-	geometry geom.MultiPolygon 
+	geometry  geom.MultiPolygon
+}
+
+func (p Property) Geometry() *geom.MultiPolygon {
+	return p.geometry.Clone()
 }
