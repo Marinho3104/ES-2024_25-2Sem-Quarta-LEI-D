@@ -5,16 +5,11 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"time"
 
+	"github.com/dhconnelly/rtreego"
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
-
-	// "github.com/dominikbraun/graph/draw"
-	"github.com/twpayne/go-geom"
-	"github.com/twpayne/go-geom/encoding/geojson"
-	"github.com/twpayne/go-geom/encoding/wkt"
 )
 
 var globalGraph graph.Graph[int, Property]
@@ -53,63 +48,35 @@ func readFile() ([][]string, error) {
 func createPropertyList() []Property {
 
 	var propertyList []Property
-
 	data, err := readFile()
 	if err != nil {
 		fmt.Println("Erro trying reading the file")
 		fmt.Println(err)
 		return nil
 	}
-
 	for i, line := range data {
-		// Ignoring first line (header)
-
 		if i > 0 {
-			var record Property
-
-			for j, field := range line {
-				switch j {
-				case 0:
-					record.id, _ = strconv.Atoi(field)
-				case 1:
-				case 2:
-				case 3:
-				case 4:
-					var value, _ = strconv.ParseFloat(field, 32)
-					record.shapeArea = float32(value)
-				case 5:
-					convertedField, err := wkt.Unmarshal(field)
-
-					if err != nil {
-						break
-					}
-
-					record.geometry =
-						*geom.NewMultiPolygonFlat(convertedField.Layout(), convertedField.FlatCoords(), convertedField.Endss())
-
-					geojson.Marshal(record.geometry.Clone())
-				case 6:
-					record.owner, _ = strconv.Atoi(field)
-				case 7:
-					record.freguesia = field
-				case 8:
-					record.municipio = field
-				case 9:
-				default:
-					panic("Unreconized field")
-				}
-			}
-
-			// Do not add wrong data
-			if record.shapeArea == 0 || record.geometry.Bounds().IsEmpty() {
+			prop, err := createProperty(line)
+			if err != nil {
 				continue
 			}
-
-			propertyList = append(propertyList, record)
+			propertyList = append(propertyList, *prop)
 		}
+
+	}
+	return propertyList
+}
+
+func CreateRTree(propertyList []Property) *rtreego.Rtree {
+
+	rTree := rtreego.NewTree(2, 25, 50)
+
+	for _, property := range propertyList {
+		rTree.Insert(&property)
 	}
 
-	return propertyList
+	return rTree
+
 }
 
 func CreateGraph() {
@@ -123,53 +90,53 @@ func CreateGraph() {
 		return p.id
 	}
 
+	fmt.Println("Creating the graph")
 	globalGraph = graph.New(propertyHash)
 	propertyList := createPropertyList()
 
-	fmt.Println("Creating the graph")
+	fmt.Println("Creating the RTree")
+	rTree := CreateRTree(propertyList)
 
+	fmt.Println("Creating the vertex")
 	for _, property := range propertyList {
 		globalGraph.AddVertex(property)
 	}
 
 	fmt.Println("Creating edges")
 
-	propertyListLen := len(propertyList)
-
 	start := time.Now()
-	for i := 0; i < propertyListLen; i++ {
-		currentProperty := propertyList[i]
 
-		for j := i + 1; j < propertyListLen; j++ {
-			cmpProperty := propertyList[j]
-			// Check if bounding boxes intersect
-			if bboxOverlap(currentProperty.geometry.Bounds(), cmpProperty.geometry.Bounds()) {
+	for _, currentProperty := range propertyList {
 
-				// fmt.Printf("%d --- %d\n", propertyList[i].id, propertyList[j].id)
-				err := globalGraph.AddEdge(currentProperty.id, cmpProperty.id)
-				if err != nil {
-					fmt.Println(err)
-				}
+		results := rTree.SearchIntersect(*currentProperty.Rect)
+		checkIfNeigbours(results)
 
-			}
-
-		}
 	}
+
 	end := time.Now()
 
 	size, _ := globalGraph.Size()
 
 	fmt.Println("Fineshed with ", size, " edges")
-	fmt.Println("In: ", end.Sub(start).Minutes())
+	fmt.Println("In: ", end.Sub(start).Seconds())
 
 	file, _ := os.Create("../../assets/graph.gv")
 	draw.DOT(globalGraph, file)
 
 }
 
-func bboxOverlap(a, b *geom.Bounds) bool {
-	return !(a.Max(0) < b.Min(0) || a.Min(0) > b.Max(0) ||
-		a.Max(1) < b.Min(1) || a.Min(1) > b.Max(1))
+func checkIfNeigbours(potentialNeighbors []rtreego.Spatial) {
+	for i := 0; i < len(potentialNeighbors); i++ {
+		property1 := potentialNeighbors[i].(*Property)
+		for j := i + 1; j < len(potentialNeighbors); j++ {
+
+			property2 := potentialNeighbors[j].(*Property)
+			if areMultiPolygonsNeighbors(&property1.Geometry, &property2.Geometry) {
+				globalGraph.AddEdge(property1.id, property2.id)
+			}
+
+		}
+	}
 }
 
 func GetGraph() graph.Graph[int, Property] {

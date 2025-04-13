@@ -45,7 +45,7 @@ func graphdata_handler(w http.ResponseWriter, r *http.Request) {
 
 		var longitude, latitude float64
 
-		clonedGeometry := property.Geometry()
+		clonedGeometry := property.Geometry
 
 		polygon := clonedGeometry.Polygon(0)
 		if polygon != nil && polygon.Length() > 0 {
