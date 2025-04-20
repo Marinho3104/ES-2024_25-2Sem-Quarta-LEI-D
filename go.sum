@@ -4,5 +4,9 @@ github.com/dominikbraun/graph v0.23.0 h1:TdZB4pPqCLFxYhdyMFb1TBdFxp8XLcJfTTBQucV
 github.com/dominikbraun/graph v0.23.0/go.mod h1:yOjYyogZLY1LSG9E33JWZJiq5k83Qy2C6POAuiViluc=
 github.com/go-spatial/proj v0.3.0 h1:2IRb4elpnmVy1tUKRGBR68uiyZU4Pmny8yZC7TEUdSg=
 github.com/go-spatial/proj v0.3.0/go.mod h1:wF0V0A60cTD5uzXeg+P52E1GtMY40PIiyYNJVvHXm6k=
+github.com/omniscale/go-proj v1.0.1 h1:LXvt36L/sByqgNuBWtmAu5p4UcDjAhkrRjD0xrjF2OY=
+github.com/omniscale/go-proj v1.0.1/go.mod h1:taFsJpXq4TXZdrCoNLFEj+ebGqv1mCDrE3cN/YVZUqo=
+github.com/paulmach/go.geojson v1.5.0 h1:7mhpMK89SQdHFcEGomT7/LuJhwhEgfmpWYVlVmLEdQw=
+github.com/paulmach/go.geojson v1.5.0/go.mod h1:DgdUy2rRVDDVgKqrjMe2vZAHMfhDTrjVKt3LmHIXGbU=
 github.com/twpayne/go-geom v1.6.0 h1:WPOJLCdd8OdcnHvKQepLKwOZrn5BzVlNxtQB59IDHRE=
 github.com/twpayne/go-geom v1.6.0/go.mod h1:Kr+Nly6BswFsKM5sd31YaoWS5PeDDH2NftJTK7Gd028=

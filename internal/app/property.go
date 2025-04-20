@@ -12,11 +12,11 @@ import (
 )
 
 type Property struct {
-	id        int
-	owner     int
-	shapeArea float32
-	freguesia string
-	municipio string
+	Id        int
+	Owner     int
+	ShapeArea float32
+	Freguesia string
+	Municipio string
 	Geometry  geom.MultiPolygon
 	Rect      *rtreego.Rect //to build corretly RTree
 }
@@ -28,14 +28,15 @@ func createProperty(property []string) (*Property, error) {
 	for j, field := range property {
 		switch j {
 		case 0:
-			record.id, _ = strconv.Atoi(field)
+			record.Id, _ = strconv.Atoi(field)
 		case 1:
 		case 2:
 		case 3:
 		case 4:
 			var value, _ = strconv.ParseFloat(field, 32)
-			record.shapeArea = float32(value)
+			record.ShapeArea = float32(value)
 		case 5:
+
 			convertedField, err := wkt.Unmarshal(field)
 
 			if err != nil {
@@ -47,11 +48,11 @@ func createProperty(property []string) (*Property, error) {
 
 			geojson.Marshal(record.Geometry.Clone())
 		case 6:
-			record.owner, _ = strconv.Atoi(field)
+			record.Owner, _ = strconv.Atoi(field)
 		case 7:
-			record.freguesia = field
+			record.Freguesia = field
 		case 8:
-			record.municipio = field
+			record.Municipio = field
 		case 9:
 		default:
 			panic("Unreconized field")
@@ -59,7 +60,7 @@ func createProperty(property []string) (*Property, error) {
 	}
 
 	// Do not add wrong data
-	if record.shapeArea == 0 || record.Geometry.Bounds().IsEmpty() {
+	if record.ShapeArea == 0 || record.Geometry.Bounds().IsEmpty() {
 		return nil, errors.New("invalid geometry")
 	}
 

@@ -87,7 +87,7 @@ func CreateGraph() {
 	}
 
 	propertyHash := func(p Property) int {
-		return p.id
+		return p.Id
 	}
 
 	fmt.Println("Creating the graph")
@@ -126,13 +126,14 @@ func CreateGraph() {
 }
 
 func checkIfNeigbours(potentialNeighbors []rtreego.Spatial) {
+	fmt.Println(len(potentialNeighbors))
 	for i := 0; i < len(potentialNeighbors); i++ {
 		property1 := potentialNeighbors[i].(*Property)
 		for j := i + 1; j < len(potentialNeighbors); j++ {
 
 			property2 := potentialNeighbors[j].(*Property)
 			if areMultiPolygonsNeighbors(&property1.Geometry, &property2.Geometry) {
-				globalGraph.AddEdge(property1.id, property2.id)
+				globalGraph.AddEdge(property1.Id, property2.Id)
 			}
 
 		}
