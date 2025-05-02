@@ -23,18 +23,16 @@ var propertyHashCode = func(p Property) int {
 
 var g = graph.New(propertyHashCode)
 
-func readFile() ([][]string, error) {
+func readFile(filename string) ([][]string, error) {
 
 	fmt.Println("Loading file...")
 
-	file, err := os.Open("../../assets/madeira.csv")
+	file, err := os.Open(filename)
 
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
-
-	fmt.Println("File loaded successfuly!! \n")
 
 	reader := csv.NewReader(file)
 	reader.Comma = ';'
@@ -58,7 +56,7 @@ func createPropertyList() []Property {
 
 	var propertyList []Property = make([]Property, 0)
 
-	data, err := readFile()
+	data, err := readFile("../../assets/madeira.csv")
 	if err != nil {
 		fmt.Println("Erro trying reading the file")
 		fmt.Println(err)
@@ -74,12 +72,11 @@ func createPropertyList() []Property {
 				switch j {
 				case 0:
 					record.id, _ = strconv.Atoi(field)
-				case 1:
-				case 2:
-				case 3:
+
 				case 4:
 					var value, _ = strconv.ParseFloat(field, 32)
 					record.shapeArea = float32(value)
+
 				case 5:
 					convertedField, err := wkt.Unmarshal(field)
 
@@ -97,7 +94,6 @@ func createPropertyList() []Property {
 					record.freguesia = field
 				case 8:
 					record.municipio = field
-				case 9:
 				default:
 					panic("Unreconized field")
 				}
