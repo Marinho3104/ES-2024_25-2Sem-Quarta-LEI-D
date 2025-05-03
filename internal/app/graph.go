@@ -5,34 +5,27 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
-	"strings"
+	"time"
 
+	"github.com/dhconnelly/rtreego"
 	"github.com/dominikbraun/graph"
 	"github.com/dominikbraun/graph/draw"
-	"github.com/twpayne/go-geom"
-	"github.com/twpayne/go-geom/encoding/geojson"
-	"github.com/twpayne/go-geom/encoding/wkt"
 )
 
-var propertyHash map[string][]Property = make(map[string][]Property)
+var globalGraph graph.Graph[int, Property]
 
-var propertyHashCode = func(p Property) int {
-	return p.id
-}
-
-var g = graph.New(propertyHashCode)
-
-func readFile(filename string) ([][]string, error) {
+func readFile() ([][]string, error) {
 
 	fmt.Println("Loading file...")
 
-	file, err := os.Open(filename)
+	file, err := os.Open("../../assets/madeira.csv")
 
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
+
+	fmt.Println("File loaded successfuly!!")
 
 	reader := csv.NewReader(file)
 	reader.Comma = ';'
@@ -54,120 +47,107 @@ func readFile(filename string) ([][]string, error) {
 
 func createPropertyList() []Property {
 
-	var propertyList []Property = make([]Property, 0)
-
-	data, err := readFile("../../assets/madeira.csv")
+	var propertyList []Property
+	data, err := readFile()
 	if err != nil {
 		fmt.Println("Erro trying reading the file")
 		fmt.Println(err)
 		return nil
 	}
-
 	for i, line := range data {
-		// Ignoring first line (header)
 		if i > 0 {
-			var record Property
-
-			for j, field := range line {
-				switch j {
-				case 0:
-					record.id, _ = strconv.Atoi(field)
-
-				case 4:
-					var value, _ = strconv.ParseFloat(field, 32)
-					record.shapeArea = float32(value)
-
-				case 5:
-					convertedField, err := wkt.Unmarshal(field)
-
-					if err != nil || strings.Contains(field, "EMPTY") {
-						break
-					}
-
-					record.geometry =
-						*geom.NewMultiPolygonFlat(convertedField.Layout(), convertedField.FlatCoords(), convertedField.Endss())
-
-					geojson.Marshal(record.geometry.Clone())
-				case 6:
-					record.owner, _ = strconv.Atoi(field)
-				case 7:
-					record.freguesia = field
-				case 8:
-					record.municipio = field
-				default:
-					panic("Unreconized field")
-				}
-			}
-
-			getCoods(line[5], record)
-
-			// Do not add wrong data
-			if record.shapeArea == 0 || record.geometry.Bounds().IsEmpty() {
+			prop, err := createProperty(line)
+			if err != nil {
 				continue
 			}
-
-			propertyList = append(propertyList, record)
+			propertyList = append(propertyList, *prop)
 		}
+
 	}
-
-	// for _, property := range propertyHash["299218.5203999998 3623637.4791"] {
-	// 	fmt.Println(property.id)
-	// }
-
 	return propertyList
 }
 
-func getCoods(mp string, property Property) {
-	result := strings.Replace(mp, "MULTIPOLYGON (((", "", 1)
-	result = strings.Replace(result, ")))", "", 1)
+func CreateRTree(propertyList []Property) *rtreego.Rtree {
 
-	results := strings.SplitSeq(result, ", ")
+	rTree := rtreego.NewTree(2, 25, 50)
 
-	for result := range results {
-		if propertyHash[result] == nil {
-			propertyHash[result] = []Property{property}
-
-		} else if !contains(propertyHash[result], property) {
-			propertyHash[result] = append(propertyHash[result], property)
-		}
+	for _, property := range propertyList {
+		rTree.Insert(&property)
 	}
+
+	return rTree
+
 }
 
 func CreateGraph() {
 
+	if globalGraph != nil {
+		fmt.Println("Graph already created, returning the existing graph.")
+		return
+	}
+
+	propertyHash := func(p Property) int {
+		return p.Id
+	}
+
+	fmt.Println("Creating the graph")
+	globalGraph = graph.New(propertyHash)
 	propertyList := createPropertyList()
 
-	fmt.Println("Creating the graph...")
+	fmt.Println("Creating the RTree")
+	rTree := CreateRTree(propertyList)
 
+	fmt.Println("Creating the vertex")
 	for _, property := range propertyList {
-		g.AddVertex(property)
+		globalGraph.AddVertex(property)
 	}
 
-	createAdges()
+	fmt.Println("Creating edges")
 
-	// size, _ := g.Size()
-	// fmt.Println("Fineshed with ", size, " edges")
-	// fmt.Println("In ", end.Sub(start).Seconds())
+	start := time.Now()
+
+	for _, currentProperty := range propertyList {
+
+		results := rTree.SearchIntersect(*currentProperty.Rect)
+		checkIfNeigbours(results)
+
+	}
+
+	end := time.Now()
+
+	size, _ := globalGraph.Size()
+
+	fmt.Println("Fineshed with ", size, " edges")
+	fmt.Println("In: ", end.Sub(start).Seconds())
 
 	file, _ := os.Create("../../assets/graph.gv")
-	draw.DOT(g, file)
+	draw.DOT(globalGraph, file)
+
 }
 
-func createAdges() {
-	for _, propertyHashList := range propertyHash {
-		for i := range propertyHashList {
-			for j := i + 1; j < len(propertyHashList); j++ {
-				g.AddEdge(propertyHashList[i].id, propertyHashList[j].id)
+func checkIfNeigbours(potentialNeighbors []rtreego.Spatial) {
+	for i := 0; i < len(potentialNeighbors); i++ {
+		property1 := potentialNeighbors[i].(*Property)
+		for j := i + 1; j < len(potentialNeighbors); j++ {
+
+			property2 := potentialNeighbors[j].(*Property)
+			if areMultiPolygonsNeighbors(&property1.Geometry, &property2.Geometry) {
+				globalGraph.AddEdge(property1.Id, property2.Id)
 			}
+
 		}
 	}
 }
 
-func contains(s []Property, e Property) bool {
-	for _, a := range s {
-		if a.id == e.id {
-			return true
-		}
+func GetGraph() graph.Graph[int, Property] {
+	if globalGraph == nil {
+		fmt.Println("Graph has not been created yet, creating now.")
+		CreateGraph()
 	}
-	return false
+	return globalGraph
 }
+
+func SetGraph(a graph.Graph[int, Property]) {
+	globalGraph = a
+}
+

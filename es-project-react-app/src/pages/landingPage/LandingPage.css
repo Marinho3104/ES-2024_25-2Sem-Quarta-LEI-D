@@ -1,0 +1,104 @@
+
+.landing-page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-page-header {
+  height: 100px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.landing-page-header-title {
+
+  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  padding: 20px;
+  user-select: none;
+
+}
+
+.landing-page-body {
+
+  flex: 1;
+
+  display: flex;
+
+}
+
+.landing-page-body-left {
+
+  flex: 1;
+
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+.landing-page-body-left-text-limit {
+
+  width: 800px;
+
+}
+
+.landing-page-body-left-text {
+
+  color: white;
+  font-size: 120px;
+  font-weight: bold;
+  user-select: none;
+
+}
+
+.landing-page-body-left-button-box {
+
+  width: 80%;
+}
+
+.landing-page-body-right {
+
+  flex: 1;
+
+  display: flex;
+}
+
+.landing-page-body-right-image-box {
+
+  width: 1000px;
+  height: 900px;
+
+}
+
+.landing-page-body-right-background-fade {
+
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 0, 0, 0.9) 0%,       /* Strong red center */
+    rgba(0, 102, 255, 0.5) 20%,    /* Strong blue layer */
+    rgba(0, 102, 255, 0.2) 50%,    /* Soft fade zone */
+    rgba(0, 102, 255, 0.025) 60%,   /* Near-transparent */
+    rgba(0, 102, 255, 0.01) 80%,   /* Near-transparent */
+    rgba(0, 102, 255, 0) 100%      /* Fully transparent */
+  );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-page-body-right-image {
+
+  width: 70%;
+  height: 70%;
+  border-radius: 20px;
+
+}
