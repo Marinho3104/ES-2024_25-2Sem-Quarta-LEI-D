@@ -9,5 +9,4 @@ import (
 func main() {
 	app.GetGraph()
 	handlers.Start()
-
 }
