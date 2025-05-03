@@ -1,0 +1,31 @@
+
+.header-button {
+
+  height: 60px;
+  width: 140px;
+  margin: 10px;
+  border-radius: 50px;
+  border-color: transparent;
+  background-color: var(--backgroundColor);
+  cursor: pointer;
+
+}
+
+.header-button-content {
+
+  font-size: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: var(--color);
+
+}
+
+.header-button:hover {
+
+  background-color: white;
+
+  .header-button-content {
+    color: #101728;
+  }
+
+}
