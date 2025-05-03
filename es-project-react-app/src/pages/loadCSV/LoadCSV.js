@@ -1,5 +1,5 @@
 import './LoadCSV.css';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import ThemedButton from '../../components/themedButton/themedButton';
 
 function LoadingCSV({ textContent }) {
@@ -9,8 +9,15 @@ function LoadingCSV({ textContent }) {
     setFile(e.target.files[0]);
   };
 
+  const hiddenFileInput = useRef(null);
+
+  const handleClick = () => {
+    hiddenFileInput.current.click();
+  }
+
   const handleFileUpload = () => {
     const formData = new FormData();
+
     formData.append('file', file);
 
     fetch('http://localhost:8080/api/upload', {
@@ -20,7 +27,7 @@ function LoadingCSV({ textContent }) {
       .then(response => response.text())
       .then(result => {
         alert(result);
-        window.location.href = '/homepage'; 
+        window.location.href = '/homepage';
       })
       .catch((error) => {
         console.error('Error uploading file:', error);
@@ -32,15 +39,22 @@ function LoadingCSV({ textContent }) {
       <section className="text-content-limit">
         <p className="text-content">{textContent}</p>
       </section>
-      
+
+      <ThemedButton
+        buttonTextContent={file ? file.name : "Escolher ficheiro..."}
+        buttonOnClick={handleClick}
+      />
+
       <input
         type="file"
         accept=".csv"
+        ref={hiddenFileInput}
         onChange={handleFileChange}
-        style={{ marginBottom: '20px' }}
+        style={{ display: 'none' }}
       />
-      
-      <ThemedButton buttonTextContent="Carregar" buttonOnClick={handleFileUpload} />
+
+      {file && <ThemedButton buttonTextContent="Carregar" buttonOnClick={handleFileUpload} />}
+
     </section>
   );
 }
