@@ -126,7 +126,6 @@ func CreateGraph() {
 }
 
 func checkIfNeigbours(potentialNeighbors []rtreego.Spatial) {
-	fmt.Println(len(potentialNeighbors))
 	for i := 0; i < len(potentialNeighbors); i++ {
 		property1 := potentialNeighbors[i].(*Property)
 		for j := i + 1; j < len(potentialNeighbors); j++ {

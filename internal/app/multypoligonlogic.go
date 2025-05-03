@@ -15,6 +15,7 @@ func areMultiPolygonsNeighbors(mp1, mp2 *geom.MultiPolygon) bool {
 			}
 		}
 	}
+
 	return false
 }
 

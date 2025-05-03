@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import SigmaGraph from './SigmaGraph';
 import './graph.css';
-import MapComponent from './MapComponent';
 
 function Graph() {
   const [headerTabsNames] = useState(["Propriedades", "Proprietários"]);
@@ -11,11 +10,11 @@ function Graph() {
     const index = headerTabsNames.indexOf(e.target.innerText);
     setHeaderTabsState(headerTabsState.map((_, i) => i === index));
   };
-  //  <SigmaGraph />
+  //  
   return (
     <section className="graph-main-content">
       <section className="graph-content">
-          <MapComponent />
+          <SigmaGraph />
       </section>
 
       <section className="graph-header-content">

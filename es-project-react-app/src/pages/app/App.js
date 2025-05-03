@@ -7,7 +7,7 @@ import Layout from './Layout';
 import Graph from '../graph/graph';
 import LoadCSVAgain from '../loadCSVAgain/loadCSVAgain';
 import HomePage from '../homepage/homepage';
-
+import Map from '../map/map';
 const textContentStandAloneLoadingCSV = "Como primeiro passo, solicitamos a disponibilização de um ficheiro CSV com os dados a carregar na plataforma."
 const textContentLoadingCSV = "A importação de um novo ficheiro CSV irá substituir o ficheiro atual e eliminar todos os dados previamente carregados."
 const textContentLandingPage = "Junta Terras, Cria Futuro"
@@ -42,6 +42,10 @@ function App() {
           <Route
             path='/graph'
             element={<Graph />}
+          />
+          <Route
+              path='/map'
+              element={<Map />}
           />
 
           <Route

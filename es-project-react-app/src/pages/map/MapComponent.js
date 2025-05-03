@@ -46,14 +46,6 @@ const MapComponent = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-
-                const cached = localStorage.getItem('geojson');
-                if (cached) {
-                    const parsed = JSON.parse(cached);
-                    setGeojson(parsed);
-                    setLoading(false);
-                    return;
-                }
                 const response = await fetch('http://localhost:8080/api/prop', {
                     signal: controller.signal
                 });
@@ -64,7 +56,6 @@ const MapComponent = () => {
                 const convertedData = convertGeoJSON(data);
 
                 setGeojson(convertedData);
-                localStorage.setItem('geojson', JSON.stringify(convertedData));
 
             } catch (err) {
                 if (err.name !== 'AbortError') {
@@ -143,7 +134,23 @@ const MapComponent = () => {
                                 'line-width': 1
                             }}
                         />
+                        <Layer
+                            id="properties-label"
+                            type="symbol"
+                            layout={{
+                                'text-field': ['to-string', ['get', 'id']],
+                                'text-size': 12,
+                                'text-offset': [0, 0.5],
+                                'text-anchor': 'top'
+                            }}
+                            paint={{
+                                'text-color': '#000000',
+                                'text-halo-color': '#ffffff',
+                                'text-halo-width': 1
+                            }}
+                        />
                     </Source>
+
                 )}
             </Map>
 
