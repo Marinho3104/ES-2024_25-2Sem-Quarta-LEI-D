@@ -150,3 +150,4 @@ func GetGraph() graph.Graph[int, Property] {
 func SetGraph(a graph.Graph[int, Property]) {
 	globalGraph = a
 }
+
