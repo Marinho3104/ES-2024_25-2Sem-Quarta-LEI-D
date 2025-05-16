@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/dhconnelly/rtreego"
@@ -27,7 +28,7 @@ func SetGraph(a graph.Graph[int, Property]) {
 
 // CreateRTree constructs and returns an R-tree populated with the given list of Properties.
 // It initializes the R-tree with default parameters and inserts each Property instance into the tree.
-func CreateRTree(propertyList []Property) *rtreego.Rtree {
+func createRTree(propertyList []Property) *rtreego.Rtree {
 
 	rTree := rtreego.NewTree(2, 8, 16)
 
@@ -56,7 +57,7 @@ func CreateGraph() {
 	propertyList := getPropertiesList()
 
 	fmt.Println("Creating the RTree")
-	rTree := CreateRTree(propertyList)
+	rTree := createRTree(propertyList)
 
 	fmt.Println("Creating the vertex")
 	for _, property := range propertyList {
@@ -80,9 +81,6 @@ func CreateGraph() {
 
 	fmt.Println("Finished with ", size, " edges")
 	fmt.Println("In: ", end.Sub(start).Seconds(), "Seconds")
-	uniqueOwners := CountUniqueOwners(propertyList)
-	fmt.Println("Number of unique owners:", uniqueOwners)
-
 }
 
 // checkIfNeigbours identifies and adds edges between neighboring Properties in the global graph based on spatial relationships.
@@ -101,12 +99,56 @@ func checkIfNeigbours(potentialNeighbors []rtreego.Spatial) {
 	}
 }
 
-func CountUniqueOwners(propertyList []Property) int {
-	ownerSet := make(map[int]struct{})
+func GetPropertyNeighbour(input interface{}) ([]Property, bool) {
+	var propertyList []Property
+	var id int
+	switch v := input.(type) {
 
-	for _, property := range propertyList {
-		ownerSet[property.Owner] = struct{}{}
+	case Property:
+		id = v.Id
+	case int:
+		id = v
+	default:
+		return nil, false
 	}
+	adjacencyMap, err := globalGraph.AdjacencyMap()
+	if err != nil {
+		log.Fatal(err)
+	}
+	neighbors, exists := adjacencyMap[id]
+	if !exists {
+		return nil, false
+	}
+	for i := range neighbors {
+		id_nei := neighbors[i].Target
+		prop, _ := globalGraph.Vertex(id_nei)
+		propertyList = append(propertyList, prop)
+	}
+	return propertyList, true
+}
+func GetIDPropertyNeighbour(input interface{}) ([]int, bool) {
+	var propertyIdList []int
+	var id int
+	switch v := input.(type) {
 
-	return len(ownerSet)
+	case Property:
+		id = v.Id
+	case int:
+		id = v
+	default:
+		return nil, false
+	}
+	adjacencyMap, err := globalGraph.AdjacencyMap()
+	if err != nil {
+		log.Fatal(err)
+	}
+	neighbors, exists := adjacencyMap[id]
+	if !exists {
+		return nil, false
+	}
+	for i := range neighbors {
+		id_nei := neighbors[i].Target
+		propertyIdList = append(propertyIdList, id_nei)
+	}
+	return propertyIdList, true
 }
