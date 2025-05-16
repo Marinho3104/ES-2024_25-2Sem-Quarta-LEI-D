@@ -16,6 +16,7 @@ require (
 	github.com/go-spatial/proj v0.3.0 // indirect
 	github.com/omniscale/go-proj v1.0.1
 	github.com/paulmach/go.geojson v1.5.0
+	github.com/paulmach/orb v0.11.1
 	github.com/surrealdb/surrealdb.go v0.3.2
 	github.com/twpayne/go-geom v1.6.0 // indirect
 )

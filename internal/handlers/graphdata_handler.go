@@ -26,6 +26,7 @@ type SigmaGraphResponse struct {
 	Edges []SigmaEdge `json:"edges"`
 }
 
+// graphdata_handler handles HTTP requests by generating and returning the graph's adjacency map as a JSON response.
 func graphdata_handler(w http.ResponseWriter, r *http.Request) {
 	g := app.GetGraph()
 

@@ -1,0 +1,82 @@
+
+.graph-main-content {
+
+  flex: 1;
+
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+
+}
+
+.graph-header-content {
+
+  width: 95%;
+  height: 5%;
+  display: flex;
+  padding-left: 50px;
+
+}
+
+.graph-header-tab {
+
+  width: 220px;
+  height: 100%;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px 0px 10px;
+  border-radius: 25px 25px 0 0;
+  font-weight: bold;
+  font-size: 22.5px;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+
+}
+
+.graph-header-tab:hover {
+
+  background-color: white;
+  color: #101728;
+
+}
+
+.graph-header-tab-selected {
+
+  user-select: none;
+  cursor: pointer;
+  color: #101728;
+  width: 220px;
+  height: 100%;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px 0px 10px;
+  border-radius: 25px 25px 0 0;
+  font-weight: bold;
+  font-size: 22.5px;
+
+}
+
+.graph-content {
+
+  border-radius: 15px;
+  margin-bottom: 1.25%;
+  width: 95%;
+  height: 90%;
+  background-color: #010204;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.sigma-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  
+}

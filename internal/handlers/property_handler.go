@@ -29,6 +29,7 @@ func property_handler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
 		feature := &geojson.Feature{
 			Geometry: &p.Geometry,
 			Properties: map[string]interface{}{

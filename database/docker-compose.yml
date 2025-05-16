@@ -10,6 +10,7 @@ services:
       - --log=trace #no idea what this does :(
       - --user=root #default user
       - --pass=root #default password
+      - --allow-scripting
     volumes:
       - ./data:/data/
     restart: always

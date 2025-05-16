@@ -7,7 +7,6 @@ import (
 
 	"github.com/dhconnelly/rtreego"
 	"github.com/twpayne/go-geom"
-	"github.com/twpayne/go-geom/encoding/geojson"
 	"github.com/twpayne/go-geom/encoding/wkt"
 )
 
@@ -17,6 +16,7 @@ type Property struct {
 	ShapeArea float32
 	Freguesia string
 	Municipio string
+	Distrito  string
 	Geometry  geom.MultiPolygon
 	Rect      *rtreego.Rect //to build corretly RTree
 }
@@ -46,7 +46,6 @@ func createProperty(property []string) (*Property, error) {
 			record.Geometry =
 				*geom.NewMultiPolygonFlat(convertedField.Layout(), convertedField.FlatCoords(), convertedField.Endss())
 
-			geojson.Marshal(record.Geometry.Clone())
 		case 6:
 			record.Owner, _ = strconv.Atoi(field)
 		case 7:
@@ -54,6 +53,7 @@ func createProperty(property []string) (*Property, error) {
 		case 8:
 			record.Municipio = field
 		case 9:
+			record.Distrito = field
 		default:
 			panic("Unreconized field")
 		}

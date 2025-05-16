@@ -11,5 +11,9 @@ func Start() {
 
 	http.HandleFunc("/api/graph", graphdata_handler)
 
+	http.HandleFunc("/api/owner", grapownerhdata_handler)
+
+	http.HandleFunc("/api/adm-area", administrative_area_handler)
+
 	http.ListenAndServe(":8080", nil)
 }
