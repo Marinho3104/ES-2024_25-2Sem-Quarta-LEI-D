@@ -2,7 +2,9 @@ package app
 
 import "fmt"
 
-// https://api.habitacao.net/graph/concelho/id_concelho para encontrar no postman o preço m² médio por freguesia
+// https://api.habitacao.net/graph/distrito/1629145 para encontrar no postman o preço m² médio por freguesia
+
+// Data para consulta: 201804
 
 func main() {
 	distritoID := "1629145" // Madeira
