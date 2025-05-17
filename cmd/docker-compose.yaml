@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  spatialite:
+    image: mdillon/spatialite
+    build: .
+    volumes:
+      - ./bd:/data     # Mount your local ./data folder to /data in container
+    working_dir: /data
+    stdin_open: true
+    tty: true
+    command: /data/ArqMadeira_CAOP2024.gpkg  # Replace with your DB file name
