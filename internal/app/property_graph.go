@@ -54,7 +54,7 @@ func CreateGraph() {
 
 	fmt.Println("Creating the graph")
 	globalGraph = graph.New(propertyHash)
-	propertyList := getPropertiesList()
+	propertyList := GetPropertigesList()
 
 	fmt.Println("Creating the RTree")
 	rTree := createRTree(propertyList)

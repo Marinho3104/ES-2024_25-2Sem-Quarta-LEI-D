@@ -9,11 +9,12 @@ import (
 
 var globalPropertyList []Property
 
+// readFile reads data from a CSV file, parses it, and returns the records as a slice of string slices or an error.
 func readFile() ([][]string, error) {
 
 	fmt.Println("Loading file...")
 
-	file, err := os.Open("../../assets/madeira.csv")
+	file, err := os.Open("../../assets/madeira_corrected.csv")
 
 	if err != nil {
 		return nil, err
@@ -40,7 +41,7 @@ func readFile() ([][]string, error) {
 	return records, nil
 }
 
-func getPropertiesList() []Property {
+func GetPropertigesList() []Property {
 	if globalPropertyList == nil {
 		globalPropertyList = createPropertyList()
 	}
