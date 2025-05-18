@@ -16,6 +16,8 @@ func Start() {
 	http.HandleFunc("/api/adm-area", administrative_area_handler)
 
 	http.HandleFunc("/api/prop-neighbour", property_neighbour_handler)
+	
+	http.HandleFunc("/api/area-average", Area_average)
 
 	http.ListenAndServe(":8080", nil)
 }
