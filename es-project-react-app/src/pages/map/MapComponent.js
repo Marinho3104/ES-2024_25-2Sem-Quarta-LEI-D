@@ -125,10 +125,26 @@ const MapComponent = () => {
                     signal: controller.signal
                 });
 
+                const response_2 = await fetch('http://localhost:8080/api/suggestions_by_neighbours');
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
+                var body_2 = await response_2.json()
+                
+                // body_2 = body_2.map(
+                //   data => data.Properties_Envolved
+                // )
+                var prop = body_2[ 0 ].Properties_Envolved.map( data => data.Id )
+                console.log( body_2[ 0 ].Suggestion )
+
                 const data = await response.json();
+
+                data.features = data.features.filter(
+                  data => prop.includes( data.properties.id )
+                )
+
                 const convertedData = convertGeoJSON(data);
+
+                // console.log( data.features[ 0 ].properties.id )
 
                 setGeojson(convertedData);
 

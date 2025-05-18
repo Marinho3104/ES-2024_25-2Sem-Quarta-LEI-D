@@ -17,5 +17,8 @@ func Start() {
 
 	http.HandleFunc("/api/prop-neighbour", property_neighbour_handler)
 
+	http.HandleFunc( "/api/suggestions_by_neighbours", suggestions_by_neighbours_handler )
+
 	http.ListenAndServe(":8080", nil)
+
 }

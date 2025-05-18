@@ -145,22 +145,3 @@ func handle_distritos_info( distritos_info []map[ string ] any, target_map map[ 
 	}
 
 }
-
-
-// var distritoID = "1629145" // Madeira
-
-// func Get_maneira_municipio_by_name() {
-
-	// // Mapa no formato Concelho/Distrito/ID/
-	// mapaConcelhoDistrito := make(map[string]string)
-	//
-	// for nome, id := range concelhos {
-	// 	key := fmt.Sprintf("%s/%s/%s", nome, distritoID, id)
-	// 	mapaConcelhoDistrito[nome] = key
-	// }
-	//
-	// // Exemplo de impressão do mapa
-	// for nome, path := range mapaConcelhoDistrito {
-	// 	fmt.Printf("Concelho: %s => Caminho: %s\n", nome, path)
-	// }
-// }
