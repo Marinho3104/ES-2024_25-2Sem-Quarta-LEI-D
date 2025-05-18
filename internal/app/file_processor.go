@@ -13,7 +13,7 @@ func readFile() ([][]string, error) {
 
 	fmt.Println("Loading file...")
 
-	file, err := os.Open("../../assets/madeira.csv")
+	file, err := os.Open("../../assets/madeira_corrected.csv")
 
 	if err != nil {
 		return nil, err
