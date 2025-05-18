@@ -2,6 +2,8 @@ package app
 
 import "fmt"
 
+// CalcOfAreaOwner calculates the average area of properties owned by a given owner based on the specified administrative level.
+// It takes the owner's name and level as inputs and returns the calculated average area or an error if the operation fails.
 func CalcOfAreaOwner(name string, level int) (float32, error) {
 	a := agregateProprities()
 	fmt.Println("A: ", a)

@@ -18,14 +18,13 @@ type Freguesia struct {
 
 var area AdministrativeArea
 
+// InsertProperty inserts a Property into the hierarchical structure of Districts, Municipalities, and Parishes (Freguesias).
+// It initializes missing levels in the hierarchy as needed and appends the Property ID to the appropriate Freguesia.
 func InsertProperty(prop Property) {
-	// Ensure Distrito map exists
 	if area.Distritos == nil {
 		area.Distritos = make(map[string]*Distrito)
 	}
 
-	// Get or create Distrito
-	
 	dist, ok := area.Distritos[prop.Distrito]
 	if !ok {
 		dist = &Distrito{
@@ -34,7 +33,6 @@ func InsertProperty(prop Property) {
 		area.Distritos[prop.Distrito] = dist
 	}
 
-	// Get or create Municipio
 	mun, ok := dist.Municipios[prop.Municipio]
 	if !ok {
 		mun = &Municipio{
@@ -43,7 +41,6 @@ func InsertProperty(prop Property) {
 		dist.Municipios[prop.Municipio] = mun
 	}
 
-	// Get or create Freguesia
 	freg, ok := mun.Freguesias[prop.Freguesia]
 	if !ok {
 		freg = &Freguesia{

@@ -29,7 +29,7 @@ func Area_average(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Calculate the average area
-	avg, err := app.CalcOfAreaOwner(name, level)
+	avg, err := app.CalcOfArea(name, level)
 	if err != nil {
 		http.Error(w, `{"error": "`+err.Error()+`"}`, http.StatusNotFound)
 		return

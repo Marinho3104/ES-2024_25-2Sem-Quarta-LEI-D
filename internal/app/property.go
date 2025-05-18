@@ -71,6 +71,7 @@ func createProperty(property []string) (*Property, error) {
 
 }
 
+// BoundsToRect converts the bounds of a MultiPolygon into an R-tree rectangle (rtreego.Rect), returning an error if creation fails.
 func BoundsToRect(multipolygon *geom.MultiPolygon) (*rtreego.Rect, error) {
 	bounds := multipolygon.Bounds()
 

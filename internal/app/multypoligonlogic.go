@@ -6,6 +6,7 @@ import (
 	"github.com/twpayne/go-geom/xy/lineintersector"
 )
 
+// areMultiPolygonsNeighbors determines if two MultiPolygon geometries share at least one touching boundary or edge.
 func areMultiPolygonsNeighbors(mp1, mp2 *geom.MultiPolygon) bool {
 
 	for i := 0; i < mp1.NumPolygons(); i++ {
@@ -21,6 +22,7 @@ func areMultiPolygonsNeighbors(mp1, mp2 *geom.MultiPolygon) bool {
 	return false
 }
 
+// doPolygonsTouch checks whether two polygons share a boundary or touch at any edge and returns true if they do.
 func doPolygonsTouch(poly1, poly2 *geom.Polygon) bool {
 	if hasSharedBoundary(poly1, poly2) {
 		return true
@@ -28,6 +30,7 @@ func doPolygonsTouch(poly1, poly2 *geom.Polygon) bool {
 	return false
 }
 
+// hasSharedBoundary determines if two polygons share a boundary by analyzing the overlap of their edges.
 func hasSharedBoundary(poly1, poly2 *geom.Polygon) bool {
 	edges1 := extractEdges(poly1)
 	edges2 := extractEdges(poly2)
@@ -55,6 +58,10 @@ func hasSharedBoundary(poly1, poly2 *geom.Polygon) bool {
 	return false
 }
 
+// extractEdges extracts all edges from the given polygon as pairs of start and end coordinates.
+// Each edge is represented as a struct containing the start and end points.
+// The function iterates through all linear rings in the polygon and constructs the edges.
+// Returns a slice of edge structs, where each struct contains the start and end coordinates of an edge.
 func extractEdges(poly *geom.Polygon) []struct{ start, end geom.Coord } {
 	var edges []struct{ start, end geom.Coord }
 	for i := 0; i < poly.NumLinearRings(); i++ {

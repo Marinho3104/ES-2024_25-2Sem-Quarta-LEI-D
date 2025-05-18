@@ -2,6 +2,9 @@ package app
 
 import "fmt"
 
+// CalcOfArea computes the average area of properties at a specified administrative level (distrito, municipio, or freguesia).
+// It takes a name and level as parameters, retrieves relevant properties for the level, and calculates the average area.
+// Returns the computed average area and an error if no properties are found or the name is invalid.
 func CalcOfArea(name string, level int) (float32, error) {
 	g := GetGraph()
 	var totalArea float32
