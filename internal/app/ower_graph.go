@@ -31,7 +31,6 @@ func createOwnerGraph() {
 		return p.Owner
 	}
 	globalOwnerGraph = graph.New(ownerHash)
-
 	propertyGraph := GetGraph()
 	adjMap, _ := propertyGraph.AdjacencyMap()
 	start := time.Now()
