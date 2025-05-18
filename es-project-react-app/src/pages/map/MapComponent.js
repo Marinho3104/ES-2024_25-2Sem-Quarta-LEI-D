@@ -21,9 +21,9 @@ const MapComponent = () => {
     const [selectedMunicipio, setSelectedMunicipio] = useState('all');
     const [selectedFreguesia, setSelectedFreguesia] = useState('all');
     const [filteredPropertyIds, setFilteredPropertyIds] = useState([]);
+
     const convertGeoJSON = useCallback((data) => {
         if (!data?.features) return data;
-
         return {
             ...data,
             features: data.features.map(feature => {
@@ -46,20 +46,14 @@ const MapComponent = () => {
         };
     }, []);
 
-    // Function to fetch administrative area data
     const fetchAdmAreaData = useCallback(async () => {
         const controller = new AbortController();
         try {
-            const response = await fetch('http://localhost:8080/api/adm-area', {
-                signal: controller.signal
-            });
-
+            const response = await fetch('http://localhost:8080/api/adm-area', { signal: controller.signal });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
             const data = await response.json();
             setAdmAreaData(data);
 
-            // Initialize with all property IDs
             const allPropertyIds = [];
             Object.keys(data.distrito).forEach(distrito => {
                 Object.keys(data.distrito[distrito].municipio).forEach(municipio => {
@@ -69,104 +63,57 @@ const MapComponent = () => {
                 });
             });
             setFilteredPropertyIds(allPropertyIds);
-
         } catch (err) {
-            if (err.name !== 'AbortError') {
-                console.error('Error fetching administrative area data:', err);
-            }
+            if (err.name !== 'AbortError') console.error('Error fetching administrative area data:', err);
         }
         return () => controller.abort();
     }, []);
 
-    // Function to update filtered property IDs based on selected filters
     const updateFilteredPropertyIds = useCallback(() => {
         if (!admAreaData) return;
-
         let newFilteredIds = [];
-
         Object.keys(admAreaData.distrito).forEach(distrito => {
             if (selectedDistrito === 'all' || selectedDistrito === distrito) {
                 Object.keys(admAreaData.distrito[distrito].municipio).forEach(municipio => {
                     if (selectedMunicipio === 'all' || selectedMunicipio === municipio) {
                         Object.keys(admAreaData.distrito[distrito].municipio[municipio].freguesia).forEach(freguesia => {
                             if (selectedFreguesia === 'all' || selectedFreguesia === freguesia) {
-                                newFilteredIds.push(
-                                    ...admAreaData.distrito[distrito].municipio[municipio].freguesia[freguesia].property_ids
-                                );
+                                newFilteredIds.push(...admAreaData.distrito[distrito].municipio[municipio].freguesia[freguesia].property_ids);
                             }
                         });
                     }
                 });
             }
         });
-
         setFilteredPropertyIds(newFilteredIds);
     }, [admAreaData, selectedDistrito, selectedMunicipio, selectedFreguesia]);
 
-    // Effect to update filters when selection changes
     useEffect(() => {
-        if (admAreaData) {
-            updateFilteredPropertyIds();
-        }
+        if (admAreaData) updateFilteredPropertyIds();
     }, [admAreaData, selectedDistrito, selectedMunicipio, selectedFreguesia, updateFilteredPropertyIds]);
 
-    // Effect to fetch administrative area data
-    useEffect(() => {
-        fetchAdmAreaData();
-    }, [fetchAdmAreaData]);
+    useEffect(() => { fetchAdmAreaData(); }, [fetchAdmAreaData]);
 
     useEffect(() => {
         const controller = new AbortController();
-
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('http://localhost:8080/api/prop', {
-                    signal: controller.signal
-                });
-
-                const response_2 = await fetch('http://localhost:8080/api/suggestions_by_neighbours');
+                const response = await fetch('http://localhost:8080/api/prop', { signal: controller.signal });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                var body_2 = await response_2.json()
-                
-                // body_2 = body_2.map(
-                //   data => data.Properties_Envolved
-                // )
-                var prop = body_2[ 0 ].Properties_Envolved.map( data => data.Id )
-                console.log( body_2[ 0 ].Suggestion )
-
                 const data = await response.json();
-
-                data.features = data.features.filter(
-                  data => prop.includes( data.properties.id )
-                )
-
-                const convertedData = convertGeoJSON(data);
-
-                // console.log( data.features[ 0 ].properties.id )
-
-                setGeojson(convertedData);
-
+                setGeojson(convertGeoJSON(data));
             } catch (err) {
                 if (err.name !== 'AbortError') {
                     console.error('Error:', err);
                     setError(err.message);
-
-                    // Fallback test data (Madeira coordinates)
                     setGeojson({
                         type: "FeatureCollection",
                         features: [{
                             type: "Feature",
                             geometry: {
                                 type: "MultiPolygon",
-                                coordinates: [
-                                    [[
-                                        [-17.903, 32.763], [-17.902, 32.763],
-                                        [-17.902, 32.764], [-17.903, 32.764],
-                                        [-17.903, 32.763]  // Closing point
-                                    ]]
-                                ]
+                                coordinates: [[[[-17.903, 32.763], [-17.902, 32.763], [-17.902, 32.764], [-17.903, 32.764], [-17.903, 32.763]]]]
                             },
                             properties: {
                                 area: 439.68985,
@@ -181,54 +128,43 @@ const MapComponent = () => {
                 setLoading(false);
             }
         };
-
         fetchData();
         return () => controller.abort();
     }, [convertGeoJSON]);
 
-
-    // Filter properties based on filteredPropertyIds
     const getFilteredGeojson = useCallback(() => {
         if (!geojson || !filteredPropertyIds.length) return geojson;
-
         return {
             ...geojson,
-            features: geojson.features.filter(feature => 
-                filteredPropertyIds.includes(feature.properties.id)
-            )
+            features: geojson.features.filter(feature => filteredPropertyIds.includes(feature.properties.id))
         };
     }, [geojson, filteredPropertyIds]);
 
-    // Get unique distritos from admAreaData
-    const getDistritos = useCallback(() => {
-        if (!admAreaData) return [];
-        return Object.keys(admAreaData.distrito);
-    }, [admAreaData]);
+    const getAverageArea = useCallback(() => {
+        if (!geojson || !filteredPropertyIds.length) return 0;
+        const filteredFeatures = geojson.features.filter(feature => filteredPropertyIds.includes(feature.properties.id));
+        if (filteredFeatures.length === 0) return 0;
+        const totalArea = filteredFeatures.reduce((sum, feature) => sum + (feature.properties.area || 0), 0);
+        return totalArea / filteredFeatures.length;
+    }, [geojson, filteredPropertyIds]);
 
-    // Get municipios for selected distrito
+    const getDistritos = useCallback(() => admAreaData ? Object.keys(admAreaData.distrito) : [], [admAreaData]);
     const getMunicipios = useCallback(() => {
         if (!admAreaData || selectedDistrito === 'all') {
-            // Get all municipios if 'all' is selected
             const allMunicipios = new Set();
             if (admAreaData) {
-                Object.keys(admAreaData.distrito).forEach(distrito => {
-                    Object.keys(admAreaData.distrito[distrito].municipio).forEach(municipio => {
-                        allMunicipios.add(municipio);
-                    });
+                Object.values(admAreaData.distrito).forEach(d => {
+                    Object.keys(d.municipio).forEach(m => allMunicipios.add(m));
                 });
             }
             return Array.from(allMunicipios);
         }
-
         return Object.keys(admAreaData.distrito[selectedDistrito].municipio);
     }, [admAreaData, selectedDistrito]);
 
-    // Get freguesias for selected municipio
     const getFreguesias = useCallback(() => {
         if (!admAreaData) return [];
-
         if (selectedDistrito === 'all' || selectedMunicipio === 'all') {
-            // Get all freguesias if 'all' is selected for distrito or municipio
             const allFreguesias = new Set();
             Object.keys(admAreaData.distrito).forEach(distrito => {
                 if (selectedDistrito === 'all' || selectedDistrito === distrito) {
@@ -243,34 +179,25 @@ const MapComponent = () => {
             });
             return Array.from(allFreguesias);
         }
-
         return Object.keys(admAreaData.distrito[selectedDistrito].municipio[selectedMunicipio].freguesia);
     }, [admAreaData, selectedDistrito, selectedMunicipio]);
 
-    // Handle distrito selection change
     const handleDistritoChange = (e) => {
-        const newDistrito = e.target.value;
-        setSelectedDistrito(newDistrito);
+        setSelectedDistrito(e.target.value);
         setSelectedMunicipio('all');
         setSelectedFreguesia('all');
     };
 
-    // Handle municipio selection change
     const handleMunicipioChange = (e) => {
         setSelectedMunicipio(e.target.value);
         setSelectedFreguesia('all');
     };
 
-    // Handle freguesia selection change
     const handleFreguesiaChange = (e) => {
         setSelectedFreguesia(e.target.value);
     };
 
-    // Toggle property IDs visibility
-    const togglePropertyIds = () => {
-        setShowPropertyIds(!showPropertyIds);
-    };
-
+    const togglePropertyIds = () => setShowPropertyIds(!showPropertyIds);
     const filteredGeojson = getFilteredGeojson();
 
     return (
@@ -282,35 +209,31 @@ const MapComponent = () => {
                 mapStyle="https://api.maptiler.com/maps/satellite/style.json?key=LSfqsa4izS6vDHlLAK4a"
             >
                 {filteredGeojson && (
-                    <Source
-                        id="properties"
-                        type="geojson"
-                        data={filteredGeojson}
-                        promoteId="id"
-                    >
+                    <Source id="properties" type="geojson" data={filteredGeojson} promoteId="id">
                         <Layer
                             id="properties-fill"
                             type="fill"
                             paint={{
                                 'fill-color': [
-                                    'match',
-                                    ['get', 'municipio'],
+                                    'match', ['get', 'municipio'],
                                     'Calheta', '#f28cb1',
+                                    'Câmara de Lobos', '#66c2a5',
                                     'Funchal', '#8dd3c7',
-                                    '#ffcc00'  // Default color
+                                    'Machico', '#ffd92f',
+                                    'Ponta do Sol', '#e78ac3',
+                                    'Porto Moniz', '#a6d854',
+                                    'Ribeira Brava', '#fc8d62',
+                                    'Santa Cruz', '#b3b3b3',
+                                    'Santana', '#80b1d3',
+                                    'São Vicente', '#fb8072',
+                                    'Porto Santo', '#cab2d6',
+                                    '#ffcc00'
                                 ],
                                 'fill-opacity': 0.7,
                                 'fill-outline-color': '#000'
                             }}
                         />
-                        <Layer
-                            id="properties-outline"
-                            type="line"
-                            paint={{
-                                'line-color': '#000',
-                                'line-width': 1
-                            }}
-                        />
+                        <Layer id="properties-outline" type="line" paint={{ 'line-color': '#000', 'line-width': 1 }} />
                         {showPropertyIds && (
                             <Layer
                                 id="properties-label"
@@ -332,91 +255,55 @@ const MapComponent = () => {
                 )}
             </Map>
 
-            {/* Filter controls */}
+            {/* Filters Panel */}
             <div style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                padding: 12,
-                borderRadius: 4,
-                zIndex: 1,
-                width: '250px',
-                boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+                position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(255,255,255,0.9)',
+                padding: 12, borderRadius: 4, zIndex: 1, width: '250px', boxShadow: '0 0 10px rgba(0,0,0,0.1)'
             }}>
                 <h3 style={{ margin: '0 0 10px 0' }}>Filters</h3>
-
                 <div style={{ marginBottom: '10px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Distrito:</label>
-                    <select 
-                        value={selectedDistrito} 
-                        onChange={handleDistritoChange}
-                        style={{ width: '100%', padding: '5px' }}
-                    >
+                    <label>Distrito:</label>
+                    <select value={selectedDistrito} onChange={handleDistritoChange} style={{ width: '100%' }}>
                         <option value="all">All Distritos</option>
-                        {getDistritos().map(distrito => (
-                            <option key={distrito} value={distrito}>{distrito}</option>
-                        ))}
+                        {getDistritos().map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                 </div>
-
                 <div style={{ marginBottom: '10px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Município:</label>
-                    <select 
-                        value={selectedMunicipio} 
-                        onChange={handleMunicipioChange}
-                        style={{ width: '100%', padding: '5px' }}
-                    >
+                    <label>Município:</label>
+                    <select value={selectedMunicipio} onChange={handleMunicipioChange} style={{ width: '100%' }}>
                         <option value="all">All Municípios</option>
-                        {getMunicipios().map(municipio => (
-                            <option key={municipio} value={municipio}>{municipio}</option>
-                        ))}
+                        {getMunicipios().map(m => <option key={m} value={m}>{m}</option>)}
                     </select>
                 </div>
-
                 <div style={{ marginBottom: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '5px' }}>Freguesia:</label>
-                    <select 
-                        value={selectedFreguesia} 
-                        onChange={handleFreguesiaChange}
-                        style={{ width: '100%', padding: '5px' }}
-                    >
+                    <label>Freguesia:</label>
+                    <select value={selectedFreguesia} onChange={handleFreguesiaChange} style={{ width: '100%' }}>
                         <option value="all">All Freguesias</option>
-                        {getFreguesias().map(freguesia => (
-                            <option key={freguesia} value={freguesia}>{freguesia}</option>
-                        ))}
+                        {getFreguesias().map(f => <option key={f} value={f}>{f}</option>)}
                     </select>
                 </div>
-
                 <div>
-                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                        <input 
-                            type="checkbox" 
-                            checked={showPropertyIds} 
-                            onChange={togglePropertyIds}
-                            style={{ marginRight: '8px' }}
-                        />
+                    <label style={{ display: 'flex', alignItems: 'center' }}>
+                        <input type="checkbox" checked={showPropertyIds} onChange={togglePropertyIds} style={{ marginRight: '8px' }} />
                         Show Property IDs
                     </label>
                 </div>
-
                 {filteredPropertyIds.length > 0 && (
-                    <div style={{ marginTop: '15px', fontSize: '0.9em' }}>
-                        <strong>Properties:</strong> {filteredPropertyIds.length}
-                    </div>
+                    <>
+                        <div style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                            <strong>Properties:</strong> {filteredPropertyIds.length}
+                        </div>
+                        <div style={{ marginTop: '5px', fontSize: '0.9em' }}>
+                            <strong>Avg. Area:</strong> {getAverageArea().toFixed(2)} m²
+                        </div>
+                    </>
                 )}
             </div>
 
-            {/* Debug overlay */}
+            {/* Debug Overlay */}
             <div style={{
-                position: 'absolute',
-                top: 10,
-                left: 10,
-                backgroundColor: 'rgba(255,255,255,0.9)',
-                padding: 8,
-                borderRadius: 4,
-                zIndex: 1,
-                fontFamily: 'monospace'
+                position: 'absolute', top: 10, left: 10, backgroundColor: 'rgba(255,255,255,0.9)',
+                padding: 8, borderRadius: 4, zIndex: 1, fontFamily: 'monospace'
             }}>
                 {loading && <div>🔄 Loading...</div>}
                 {error && <div style={{ color: 'red' }}>❌ {error}</div>}

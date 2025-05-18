@@ -54,14 +54,20 @@ func CreateGraph() {
 
 	fmt.Println("Creating the graph")
 	globalGraph = graph.New(propertyHash)
-	propertyList := getPropertiesList()
+	propertyList := GetPropertigesList()
 
 	fmt.Println("Creating the RTree")
 	rTree := createRTree(propertyList)
 
 	fmt.Println("Creating the vertex")
-	for _, property := range propertyList {
-		globalGraph.AddVertex(property)
+	fmt.Println("Number of properties: ", len(propertyList))
+	for i, property := range propertyList {
+		err := globalGraph.AddVertex(property)
+		if err != nil {
+
+			fmt.Println("Error adding vertex ", err, " with id ", property.Id)
+			fmt.Println("Previus id : ", propertyList[i-1].Id)
+		}
 	}
 
 	fmt.Println("Creating edges")
@@ -78,8 +84,9 @@ func CreateGraph() {
 	end := time.Now()
 
 	size, _ := globalGraph.Size()
+	ver, _ := globalGraph.Order()
 
-	fmt.Println("Finished with ", size, " edges")
+	fmt.Println("Finished with ", size, " edges ", ver, " vertices")
 	fmt.Println("In: ", end.Sub(start).Seconds(), "Seconds")
 }
 

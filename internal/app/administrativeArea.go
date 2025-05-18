@@ -25,7 +25,7 @@ func InsertProperty(prop Property) {
 	}
 
 	// Get or create Distrito
-	
+
 	dist, ok := area.Distritos[prop.Distrito]
 	if !ok {
 		dist = &Distrito{
