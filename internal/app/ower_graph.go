@@ -97,47 +97,4 @@ func createOwnerGraph() {
 	order, _ := globalOwnerGraph.Order()
 	fmt.Println("Finished OwnerGraph with", size, "edges and", order, "vertices")
 
-	fmt.Println("\n=== Full Owner Graph Edges ===")
-
-	allEdges, _ := globalOwnerGraph.Edges()
-	type fullEdge struct {
-		Source int
-		Target int
-		Props  []int
-	}
-
-	formatted := []fullEdge{}
-	for _, edge := range allEdges {
-		if edge.Source != edge.Target {
-			continue
-		}
-		data, ok := edge.Properties.Data.(map[int]struct{})
-		if !ok {
-			continue
-		}
-		propIDs := make([]int, 0, len(data))
-		for id := range data {
-			propIDs = append(propIDs, id)
-		}
-		formatted = append(formatted, fullEdge{
-			Source: edge.Source,
-			Target: edge.Target,
-			Props:  propIDs,
-		})
-	}
-
-	// Sort edges by Source then Target
-	sort.Slice(formatted, func(i, j int) bool {
-		if formatted[i].Source != formatted[j].Source {
-			return formatted[i].Source < formatted[j].Source
-		}
-		return formatted[i].Target < formatted[j].Target
-	})
-
-	for _, fe := range formatted {
-		fmt.Printf("Edge: owner %d -> owner %d, properties=%v\n", fe.Source, fe.Target, fe.Props)
-	}
-
-	fmt.Printf("Total edges in full graph: %d\n", len(formatted))
-
 }
