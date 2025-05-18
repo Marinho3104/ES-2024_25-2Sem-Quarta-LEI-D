@@ -92,6 +92,10 @@ func BoundsToRect(multipolygon *geom.MultiPolygon) (*rtreego.Rect, error) {
 	return &rect, nil
 }
 
+func propertyEquals(a, b Property) bool {
+	return a.Id == b.Id
+}
+
 func (obj *Property) Bounds() rtreego.Rect {
 	return *obj.Rect
 }
