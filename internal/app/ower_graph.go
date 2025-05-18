@@ -59,35 +59,35 @@ func createOwnerGraph() {
 		property2, _ := propertyGraph.Vertex(ed.Target)
 
 		// Build edge data: only include target property ID
-		newIDs := map[int]struct{}{
-			property2.Id: {},
+		newIDs := map[int]int{
+			property2.Id: property1.Id,
 		}
 
 		// Add edge: property1.Owner -> property2.Owner
 		err := globalOwnerGraph.AddEdge(property1.Owner, property2.Owner, graph.EdgeData(newIDs))
 		if err != nil {
 			existingEdge, _ := globalOwnerGraph.Edge(property1.Owner, property2.Owner)
-			existingData, ok := existingEdge.Properties.Data.(map[int]struct{})
+			existingData, ok := existingEdge.Properties.Data.(map[int]int)
 			if !ok {
-				existingData = map[int]struct{}{}
+				existingData = map[int]int{}
 			}
-			existingData[property2.Id] = struct{}{}
+			existingData[property2.Id] = property1.Id
 			_ = globalOwnerGraph.UpdateEdge(property1.Owner, property2.Owner, graph.EdgeData(existingData))
 		}
 
-		// Repeat for reverse direction: property2.Owner -> property1.Owner
-		reverseIDs := map[int]struct{}{
-			property1.Id: {},
+		reverseIDs := map[int]int{
+			property1.Id: property2.Id,
 		}
 
+		// Add edge: property1.Owner -> property2.Owner
 		err = globalOwnerGraph.AddEdge(property2.Owner, property1.Owner, graph.EdgeData(reverseIDs))
 		if err != nil {
 			existingEdge, _ := globalOwnerGraph.Edge(property2.Owner, property1.Owner)
-			existingData, ok := existingEdge.Properties.Data.(map[int]struct{})
+			existingData, ok := existingEdge.Properties.Data.(map[int]int)
 			if !ok {
-				existingData = map[int]struct{}{}
+				existingData = map[int]int{}
 			}
-			existingData[property1.Id] = struct{}{}
+			existingData[property1.Id] = property2.Id
 			_ = globalOwnerGraph.UpdateEdge(property2.Owner, property1.Owner, graph.EdgeData(existingData))
 		}
 	}
